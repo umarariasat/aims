@@ -12,13 +12,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Aims High School",
   description: "Official website of Aims High School",
   icons: {
-    icon: "/images/logoaims.png",
-    shortcut: "/images/logoaims.png",
-    apple: "/images/logoaims.png",
+    icon: "/images/logoaims.png?v=2",
+    shortcut: "/images/logoaims.png?v=2",
+    apple: "/images/logoaims.png?v=2",
   },
 };
 export default function RootLayout({ children }: LayoutProps<"/">) {
