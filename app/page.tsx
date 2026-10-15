@@ -183,6 +183,10 @@ function useInView<T extends HTMLElement>(threshold = 0.2) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return;
+    }
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -199,7 +203,9 @@ function useInView<T extends HTMLElement>(threshold = 0.2) {
   return { ref, inView };
 }
 
-/** Scroll-triggered entrance. `up` slides, `clip` wipes open, `left` slides sideways. */
+/** Scroll-triggered entrance. `up` slides, `clip` wipes open, `left` slides sideways.
+    The outer element is never clipped or transformed, so it is the one observed;
+    the inner element carries the animation. */
 function Reveal({
   children,
   variant = "up",
@@ -213,12 +219,13 @@ function Reveal({
 }) {
   const { ref, inView } = useInView<HTMLDivElement>(0.15);
   return (
-    <div
-      ref={ref}
-      className={`reveal reveal-${variant} ${inView ? "is-in" : ""} ${className}`}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
-      {children}
+    <div ref={ref} className={className}>
+      <div
+        className={`reveal reveal-${variant} relative h-full w-full ${inView ? "is-in" : ""}`}
+        style={{ transitionDelay: `${delay}ms` }}
+      >
+        {children}
+      </div>
     </div>
   );
 }
