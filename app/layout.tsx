@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   title: "Aims High School",
   description: "Official website of Aims High School",
   icons: {
-    icon: "/images/logoaims.png",
+    icon: "favicon.ico",
     shortcut: "/images/logoaims.png",
     apple: "/images/logoaims.png",
   },
