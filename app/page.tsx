@@ -32,7 +32,7 @@ const cormorant = Cormorant_Garamond({
 ------------------------------------ */
 
 const display = "font-[family-name:var(--font-cormorant)]";
-const container = "mx-auto max-w-7xl px-6 sm:px-8 lg:px-14";
+const container = "mx-auto max-w-7xl px-5 sm:px-8 lg:px-14";
 const focus =
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2E6DA4]";
 
@@ -78,7 +78,7 @@ const slides = [
       "A thoughtful beginning where curiosity is nurtured, confidence takes root, and every child is given room to discover who they can become.",
   },
   {
-    image: "/images/school1.png",
+    image: "/images/school11.png",
     label: "Learning",
     line1: "Think beyond",
     line2: "the expected.",
@@ -132,7 +132,7 @@ const stages = [
 ];
 
 const gallery = [
-  { src: "/images/life15.jpg", alt: "Students at Aim High School", span: "col-span-2 md:col-span-2 md:row-span-2" },
+  { src: "/images/life15.jpg", alt: "Students at Aim High School", span: "col-span-2 row-span-2 md:col-span-2 md:row-span-2" },
   { src: "/images/life13.jpg", alt: "Students learning at Aim High School", span: "" },
   { src: "/images/life14.jpg", alt: "School life at Aim High School", span: "" },
   { src: "/images/life11.jpg", alt: "Activities at Aim High School", span: "" },
@@ -469,13 +469,33 @@ export default function Home() {
     return () => window.removeEventListener("keydown", onKey);
   }, [menuOpen]);
 
-  /* Hero mouse parallax */
+  /* Close the mobile menu if the viewport grows to the desktop layout
+     (rotating a tablet, resizing a window) */
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const onChange = (e: MediaQueryListEvent) => {
+      if (e.matches) setMenuOpen(false);
+    };
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  /* Hero mouse parallax (mouse only; touch has no hover) */
   const onHeroMouseMove = (e: ReactMouseEvent<HTMLElement>) => {
     const el = heroRef.current;
     if (!el || prefersReducedMotion()) return;
     const r = el.getBoundingClientRect();
     el.style.setProperty("--mx", String(((e.clientX - r.left) / r.width - 0.5) * 2));
     el.style.setProperty("--my", String(((e.clientY - r.top) / r.height - 0.5) * 2));
+  };
+
+  /* Pause the slideshow on hover — mouse only. Touch taps would otherwise
+     leave the slideshow stuck paused after the first tap. */
+  const onHeroPointerEnter = (e: ReactPointerEvent<HTMLElement>) => {
+    if (e.pointerType === "mouse") setPaused(true);
+  };
+  const onHeroPointerLeave = (e: ReactPointerEvent<HTMLElement>) => {
+    if (e.pointerType === "mouse") setPaused(false);
   };
 
   /* Enquiry form -> WhatsApp */
@@ -523,7 +543,7 @@ export default function Home() {
       />
 
       <style>{`
-        html { scroll-behavior: smooth; }
+        html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 
         /* Entrances */
         .reveal { transition-property: opacity, transform, clip-path;
@@ -541,6 +561,12 @@ export default function Home() {
                 transition: transform 1.05s cubic-bezier(.22,1,.36,1);
                 transition-delay: calc(var(--i) * 70ms); }
         .is-in .word { transform: none; }
+
+        /* Academics stacking cards: tighter offsets on small screens */
+        .stack-card { top: calc(88px + var(--n, 0) * 14px); }
+        @media (min-width: 1024px) {
+          .stack-card { top: calc(112px + var(--n, 0) * 20px); }
+        }
 
         /* Hero */
         @keyframes ah-reveal { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
@@ -577,6 +603,8 @@ export default function Home() {
 
       {/* =====================================================
           HEADER
+          Desktop nav shows from lg (1024px) so tablets use the menu
+          instead of overflowing the bar.
       ====================================================== */}
       <header
         className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
@@ -589,16 +617,16 @@ export default function Home() {
       >
         <nav
           aria-label="Main"
-          className={`${container} flex items-center justify-between transition-[height] duration-300 ${
-            scrolled ? "h-[72px]" : "h-20"
+          className={`${container} flex items-center justify-between gap-3 transition-[height] duration-300 ${
+            scrolled ? "h-16 sm:h-[72px]" : "h-[72px] sm:h-20"
           }`}
         >
           <a
             href="#top"
             aria-label={`${FULL_NAME} — back to top`}
-            className={`flex items-center gap-3 ${focus}`}
+            className={`flex min-w-0 items-center gap-2.5 sm:gap-3 ${focus}`}
           >
-            <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#183B56]/10 bg-white shadow-[0_4px_14px_rgba(24,59,86,0.12)]">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#183B56]/10 bg-white shadow-[0_4px_14px_rgba(24,59,86,0.12)] sm:h-14 sm:w-14">
               <Image
                 src="/images/logoaims.png"
                 alt=""
@@ -608,17 +636,17 @@ export default function Home() {
                 className="h-full w-full scale-[1.12] object-contain"
               />
             </span>
-            <span className="leading-none text-[#183B56]">
-              <span className={`${display} block text-2xl font-semibold`}>
+            <span className="min-w-0 leading-none text-[#183B56]">
+              <span className={`${display} block text-xl font-semibold sm:text-2xl`}>
                 Aim High
               </span>
-              <span className="mt-1 block max-w-[10.5rem] text-[10px] font-medium leading-[1.25] tracking-wide text-[#183B56]/75 sm:max-w-none sm:text-[11px]">
+              <span className="mt-1 block max-w-[9.5rem] text-[9.5px] font-medium leading-[1.25] tracking-wide text-[#183B56]/75 min-[400px]:max-w-[10.5rem] min-[400px]:text-[10px] sm:max-w-none sm:text-[11px]">
                 {FULL_NAME}
               </span>
             </span>
           </a>
 
-          <ul className="hidden items-center gap-9 md:flex">
+          <ul className="hidden items-center gap-9 lg:flex">
             {navLinks.slice(0, 4).map((link) => (
               <li key={link.href}>
                 <a
@@ -635,7 +663,7 @@ export default function Home() {
             ))}
           </ul>
 
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-3">
             <span className="hidden sm:inline-block">
               <Magnetic strength={0.2}>
                 <a
@@ -653,7 +681,7 @@ export default function Home() {
               aria-expanded={menuOpen}
               aria-controls="mobile-menu"
               aria-label={menuOpen ? "Close menu" : "Open menu"}
-              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#183B56]/20 text-[#183B56] md:hidden ${focus}`}
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#183B56]/20 text-[#183B56] lg:hidden ${focus}`}
             >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                 {menuOpen ? (
@@ -667,14 +695,17 @@ export default function Home() {
         </nav>
 
         {menuOpen && (
-          <div id="mobile-menu" className="ah-menu border-t border-[#183B56]/10 bg-white md:hidden">
-            <ul className={`${container} flex flex-col py-3`}>
+          <div
+            id="mobile-menu"
+            className="ah-menu max-h-[calc(100svh-4.5rem)] overflow-y-auto border-t border-[#183B56]/10 bg-white lg:hidden"
+          >
+            <ul className={`${container} flex flex-col py-2`}>
               {navLinks.map((link) => (
                 <li key={link.href}>
                   <a
                     href={link.href}
                     onClick={() => setMenuOpen(false)}
-                    className={`block border-b border-[#183B56]/10 py-4 text-base font-medium text-[#183B56] last:border-0 ${focus}`}
+                    className={`flex min-h-[52px] items-center border-b border-[#183B56]/10 text-base font-medium text-[#183B56] last:border-0 ${focus}`}
                   >
                     {link.label}
                   </a>
@@ -693,8 +724,8 @@ export default function Home() {
         ref={heroRef}
         aria-label={`Welcome to ${FULL_NAME}`}
         className="relative min-h-[100svh] overflow-hidden bg-[#E7F2FA]"
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
+        onPointerEnter={onHeroPointerEnter}
+        onPointerLeave={onHeroPointerLeave}
         onMouseMove={onHeroMouseMove}
         onFocus={(e) => {
           if (e.target.matches(":focus-visible")) setPaused(true);
@@ -743,20 +774,21 @@ export default function Home() {
           })}
         </div>
 
-        {/* Readability overlays */}
-        <div className="absolute inset-0 bg-gradient-to-r from-white/85 via-white/60 to-white/15 lg:via-white/40 lg:to-transparent" />
+        {/* Readability overlays: on phones the text spans the full width, so the
+            veil is an even top-to-bottom wash; from sm it fades left-to-right. */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-white/70 to-white/55 sm:bg-gradient-to-r sm:from-white/85 sm:via-white/60 sm:to-white/15 lg:via-white/40 lg:to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#183B56]/15 via-transparent to-transparent" />
 
         {/* Content */}
         <div
-          className={`${container} relative z-10 flex min-h-[100svh] items-center pb-32 pt-28`}
+          className={`${container} relative z-10 flex min-h-[100svh] items-center pb-28 pt-28 sm:pb-32`}
           style={{
             transform: "translate3d(0, calc(var(--sy, 0) * 0.12px), 0)",
             opacity: "calc(1 - var(--sy, 0) / 750)",
           }}
         >
           <div key={active} className="max-w-3xl">
-            <p className="ah-reveal mb-6 flex items-center gap-3 text-sm font-medium text-[#2E6DA4]">
+            <p className="ah-reveal mb-5 flex items-center gap-3 text-sm font-medium text-[#2E6DA4] sm:mb-6">
               <span className="h-px w-10 bg-[#2E6DA4]/60" aria-hidden="true" />
               {current.label}
             </p>
@@ -765,24 +797,24 @@ export default function Home() {
               as="h1"
               lines={[current.line1, current.line2]}
               italicLast
-              className="text-[clamp(2.9rem,8vw,7.25rem)] font-medium leading-[0.95] tracking-[-0.02em] text-[#183B56]"
+              className="text-[clamp(2.5rem,9vw,7.25rem)] font-medium leading-[0.95] tracking-[-0.02em] text-[#183B56]"
             />
 
             <p
-              className="ah-reveal mt-8 max-w-lg text-base leading-7 text-[#3F5266] sm:text-lg sm:leading-8"
+              className="ah-reveal mt-6 max-w-lg text-[15px] leading-7 text-[#3F5266] sm:mt-8 sm:text-lg sm:leading-8"
               style={{ animationDelay: "380ms" }}
             >
               {current.description}
             </p>
 
             <div
-              className="ah-reveal mt-10 flex flex-wrap items-center gap-4"
+              className="ah-reveal mt-8 flex flex-wrap items-center gap-3 sm:mt-10 sm:gap-4"
               style={{ animationDelay: "500ms" }}
             >
               <Magnetic>
                 <a
                   href="#contact"
-                  className={`inline-block rounded-full bg-[#183B56] px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[#2A5A7F] ${focus}`}
+                  className={`inline-block rounded-full bg-[#183B56] px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[#2A5A7F] sm:px-7 ${focus}`}
                 >
                   Plan a visit
                 </a>
@@ -790,7 +822,7 @@ export default function Home() {
               <Magnetic>
                 <a
                   href="#story"
-                  className={`inline-block rounded-full border border-[#183B56]/30 bg-white/60 px-7 py-3.5 text-sm font-semibold text-[#183B56] backdrop-blur-sm transition-colors hover:border-[#183B56] hover:bg-white ${focus}`}
+                  className={`inline-block rounded-full border border-[#183B56]/30 bg-white/60 px-6 py-3.5 text-sm font-semibold text-[#183B56] backdrop-blur-sm transition-colors hover:border-[#183B56] hover:bg-white sm:px-7 ${focus}`}
                 >
                   Read our story
                 </a>
@@ -809,7 +841,7 @@ export default function Home() {
                 onClick={() => setActive(i)}
                 aria-label={`Show slide ${i + 1}: ${slide.label}`}
                 aria-current={active === i}
-                className={`w-20 py-2 text-left sm:w-36 ${focus}`}
+                className={`w-[4.5rem] py-3 text-left min-[400px]:w-20 sm:w-36 sm:py-2 ${focus}`}
               >
                 <span
                   className={`mb-2 hidden text-xs font-medium transition-colors sm:block ${
@@ -849,13 +881,13 @@ export default function Home() {
       {/* =====================================================
           VALUES MARQUEE
       ====================================================== */}
-      <div className="overflow-hidden bg-[#183B56] py-5" aria-hidden="true">
+      <div className="overflow-hidden bg-[#183B56] py-4 sm:py-5" aria-hidden="true">
         <div className="marquee flex w-max">
           {[0, 1].map((copy) => (
             <ul key={copy} className="flex shrink-0 items-center">
               {values.map((value) => (
                 <li key={value} className="flex items-center">
-                  <span className={`${display} px-8 text-3xl italic text-white/90 md:text-4xl`}>
+                  <span className={`${display} px-6 text-2xl italic text-white/90 sm:px-8 sm:text-3xl md:text-4xl`}>
                     {value}
                   </span>
                   <span className="h-2 w-2 rounded-full bg-[#6FA8DC]" />
@@ -871,20 +903,20 @@ export default function Home() {
       ====================================================== */}
       <section aria-label={`${FULL_NAME} at a glance`} className="border-b border-[#183B56]/10 bg-white">
         <dl className={`${container} grid divide-y divide-[#183B56]/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0`}>
-          <div className="py-8 sm:px-8 sm:first:pl-0">
-            <dt className={`${display} text-5xl font-medium leading-none text-[#183B56]`}>
+          <div className="py-7 sm:px-6 sm:py-8 lg:px-8 sm:first:pl-0">
+            <dt className={`${display} text-4xl font-medium leading-none text-[#183B56] sm:text-5xl`}>
               <Counter from={1990} to={2007} />
             </dt>
             <dd className="mt-3 text-sm text-[#526174]">The year the school was founded</dd>
           </div>
-          <div className="py-8 sm:px-8">
-            <dt className={`${display} text-5xl font-medium leading-none text-[#183B56]`}>
+          <div className="py-7 sm:px-6 sm:py-8 lg:px-8">
+            <dt className={`${display} text-4xl font-medium leading-none text-[#183B56] sm:text-5xl`}>
               <Counter from={0} to={3} suffix=" stages" duration={1000} />
             </dt>
             <dd className="mt-3 text-sm text-[#526174]">Early Years, Primary and Senior School</dd>
           </div>
-          <div className="py-8 sm:px-8 sm:last:pr-0">
-            <dt className={`${display} text-5xl font-medium leading-none text-[#183B56]`}>
+          <div className="py-7 sm:px-6 sm:py-8 lg:px-8 sm:last:pr-0">
+            <dt className={`${display} text-4xl font-medium leading-none text-[#183B56] sm:text-5xl`}>
               Gujrat
             </dt>
             <dd className="mt-3 text-sm text-[#526174]">Jalalpur Jattan Road, Punjab</dd>
@@ -895,16 +927,16 @@ export default function Home() {
       {/* =====================================================
           OUR STORY
       ====================================================== */}
-      <section id="story" className="relative scroll-mt-20 overflow-hidden bg-[#F8FBFF] py-20 lg:py-28">
-        <div className={`${container} grid items-center gap-14 lg:grid-cols-[1fr_440px] lg:gap-24`}>
+      <section id="story" className="relative scroll-mt-20 overflow-hidden bg-[#F8FBFF] py-16 sm:py-20 lg:py-28">
+        <div className={`${container} grid items-center gap-12 lg:grid-cols-[1fr_440px] lg:gap-24`}>
           <div>
             <Heading
               lines={["Where it all", "began."]}
               italicLast
-              className="max-w-2xl text-[clamp(2.75rem,5.5vw,4.75rem)] font-medium leading-[1.02] tracking-[-0.02em] text-[#183B56]"
+              className="max-w-2xl text-[clamp(2.4rem,5.5vw,4.75rem)] font-medium leading-[1.02] tracking-[-0.02em] text-[#183B56]"
             />
 
-            <div className="mt-8 max-w-xl space-y-5 text-base leading-8 text-[#526174] md:text-[17px]">
+            <div className="mt-7 max-w-xl space-y-5 text-[15px] leading-7 text-[#526174] sm:mt-8 sm:text-base sm:leading-8 md:text-[17px]">
               <Reveal delay={150}>
                 <p>
                   <strong className="font-semibold text-[#183B56]">{FULL_NAME}</strong>{" "}
@@ -929,7 +961,7 @@ export default function Home() {
               </Reveal>
             </div>
 
-            <Reveal delay={400} className="mt-9">
+            <Reveal delay={400} className="mt-8 sm:mt-9">
               <Magnetic>
                 <a
                   href="#academics"
@@ -943,8 +975,8 @@ export default function Home() {
 
           <Reveal variant="clip" className="mx-auto w-full max-w-[440px]">
             <figure className="relative">
-              <div className="absolute inset-x-3 bottom-16 top-5 rounded-[3rem] bg-[#E7F2FA]" />
-              <div className="relative z-10 h-[460px] w-full">
+              <div className="absolute inset-x-3 bottom-16 top-5 rounded-[2.5rem] bg-[#E7F2FA] sm:rounded-[3rem]" />
+              <div className="relative z-10 h-[360px] w-full min-[400px]:h-[400px] sm:h-[460px]">
                 <Image
                   src="/images/founder.png"
                   alt={`Mr. Muhammad Sajid, founder of ${FULL_NAME}`}
@@ -953,8 +985,8 @@ export default function Home() {
                   className="object-contain object-bottom"
                 />
               </div>
-              <figcaption className="relative z-20 ml-5 mt-3 border-l-2 border-[#6FA8DC] pl-5">
-                <span className={`${display} block text-3xl font-medium text-[#183B56]`}>
+              <figcaption className="relative z-20 ml-4 mt-3 border-l-2 border-[#6FA8DC] pl-4 sm:ml-5 sm:pl-5">
+                <span className={`${display} block text-2xl font-medium text-[#183B56] sm:text-3xl`}>
                   Mr. Muhammad Sajid
                 </span>
                 <span className="mt-1 block text-sm text-[#526174]">
@@ -969,16 +1001,16 @@ export default function Home() {
       {/* =====================================================
           ACADEMICS — stacking cards
       ====================================================== */}
-      <section id="academics" className="scroll-mt-20 bg-[#E7F2FA] py-20 lg:py-28">
-        <div className={`${container} grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20`}>
+      <section id="academics" className="scroll-mt-20 bg-[#E7F2FA] py-16 sm:py-20 lg:py-28">
+        <div className={`${container} grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20`}>
           <div className="lg:sticky lg:top-32 lg:self-start">
             <Heading
               lines={["Learning that", "opens doors."]}
               italicLast
-              className="text-[clamp(2.75rem,5vw,4.5rem)] font-medium leading-[1.02] tracking-[-0.02em] text-[#183B56]"
+              className="text-[clamp(2.4rem,5vw,4.5rem)] font-medium leading-[1.02] tracking-[-0.02em] text-[#183B56]"
             />
             <Reveal delay={200}>
-              <p className="mt-6 max-w-md text-base leading-8 text-[#526174]">
+              <p className="mt-5 max-w-md text-[15px] leading-7 text-[#526174] sm:mt-6 sm:text-base sm:leading-8">
                 At Aim High School, learning goes beyond remembering information.
                 Students are encouraged to question, explore, create, and use what
                 they learn with confidence.
@@ -995,18 +1027,18 @@ export default function Home() {
             {stages.map((stage, i) => (
               <li
                 key={stage.title}
-                className={`sticky mb-6 flex min-h-[260px] items-start justify-between overflow-hidden rounded-[2rem] p-8 shadow-[0_18px_40px_-18px_rgba(24,59,86,0.35)] sm:p-10 ${stage.bg}`}
-                style={{ top: 112 + i * 20 }}
+                className={`stack-card sticky mb-5 flex min-h-[230px] items-start justify-between overflow-hidden rounded-[1.75rem] p-6 shadow-[0_18px_40px_-18px_rgba(24,59,86,0.35)] sm:mb-6 sm:min-h-[260px] sm:rounded-[2rem] sm:p-10 ${stage.bg}`}
+                style={{ "--n": i } as CSSProperties}
               >
                 <div className="relative z-10 max-w-sm self-end">
-                  <h3 className={`${display} text-4xl font-medium leading-none`}>
+                  <h3 className={`${display} text-3xl font-medium leading-none sm:text-4xl`}>
                     {stage.title}
                   </h3>
-                  <p className={`mt-4 text-base leading-7 ${stage.sub}`}>{stage.text}</p>
+                  <p className={`mt-3 text-[15px] leading-7 sm:mt-4 sm:text-base ${stage.sub}`}>{stage.text}</p>
                 </div>
                 <span
                   aria-hidden="true"
-                  className={`${display} pointer-events-none absolute -right-2 -top-6 select-none text-[8rem] font-medium leading-none sm:text-[11rem] ${stage.num}`}
+                  className={`${display} pointer-events-none absolute -right-1 -top-4 select-none text-[7rem] font-medium leading-none sm:-right-2 sm:-top-6 sm:text-[11rem] ${stage.num}`}
                 >
                   {stage.number}
                 </span>
@@ -1025,13 +1057,13 @@ export default function Home() {
       {/* =====================================================
           STUDENT LIFE — parallax mosaic
       ====================================================== */}
-      <section id="life" className="scroll-mt-20 bg-[#F8FBFF] py-20 lg:py-28">
+      <section id="life" className="scroll-mt-20 bg-[#F8FBFF] py-16 sm:py-20 lg:py-28">
         <div className={container}>
-          <div className="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+          <div className="mb-8 flex flex-col justify-between gap-4 sm:mb-10 md:flex-row md:items-end">
             <Heading
               lines={["Life at", "Aim High School"]}
               italicLast
-              className="text-[clamp(2.75rem,5vw,4.5rem)] font-medium leading-[1.02] tracking-[-0.02em] text-[#183B56]"
+              className="text-[clamp(2.4rem,5vw,4.5rem)] font-medium leading-[1.02] tracking-[-0.02em] text-[#183B56]"
             />
             <Reveal delay={200}>
               <p className={`${display} text-xl italic text-[#526174] md:text-right md:text-2xl`}>
@@ -1040,13 +1072,13 @@ export default function Home() {
             </Reveal>
           </div>
 
-          <div className="grid auto-rows-[170px] grid-cols-2 gap-3 sm:auto-rows-[210px] md:grid-cols-3 md:auto-rows-[240px] md:gap-4">
+          <div className="grid auto-rows-[150px] grid-cols-2 gap-2.5 min-[400px]:auto-rows-[170px] sm:auto-rows-[210px] sm:gap-3 md:grid-cols-3 md:auto-rows-[240px] md:gap-4">
             {gallery.map((photo, i) => (
               <Reveal
                 key={photo.src}
                 variant="clip"
                 delay={(i % 3) * 120}
-                className={`group relative overflow-hidden rounded-3xl bg-[#E7F2FA] ${photo.span}`}
+                className={`group relative overflow-hidden rounded-2xl bg-[#E7F2FA] sm:rounded-3xl ${photo.span}`}
               >
                 <div
                   data-parallax="0.09"
@@ -1070,7 +1102,7 @@ export default function Home() {
       {/* =====================================================
           ALUMNI — static editorial grid
       ====================================================== */}
-      <section id="alumni" className="scroll-mt-20 bg-[#E7F2FA] py-20 lg:py-28">
+      <section id="alumni" className="scroll-mt-20 bg-[#E7F2FA] py-16 sm:py-20 lg:py-28">
         <div className={container}>
           <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div>
@@ -1081,10 +1113,10 @@ export default function Home() {
               <Heading
                 lines={["Where our graduates", "are today."]}
                 italicLast
-                className="text-[clamp(2.75rem,5vw,4.5rem)] font-medium leading-[1.02] tracking-[-0.02em] text-[#183B56]"
+                className="text-[clamp(2.4rem,5vw,4.5rem)] font-medium leading-[1.02] tracking-[-0.02em] text-[#183B56]"
               />
 
-              <p className="mt-5 max-w-sm text-base leading-7 text-[#526174]">
+              <p className="mt-5 max-w-sm text-[15px] leading-7 text-[#526174] sm:text-base">
                 Different dreams, different journeys, one beginning.
               </p>
             </div>
@@ -1092,10 +1124,10 @@ export default function Home() {
             <div className="hidden h-px w-24 bg-[#2E6DA4]/50 md:block" aria-hidden="true" />
           </div>
 
-          <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-10 grid grid-cols-1 gap-4 sm:mt-12 sm:grid-cols-2 lg:grid-cols-4">
             {alumniCards.map((item, i) => (
               <Reveal key={item.number} delay={i * 100} className="h-full">
-                <article className="group relative flex h-full min-h-[300px] flex-col overflow-hidden rounded-2xl border border-[#183B56]/10 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#2E6DA4]/50 hover:shadow-lg hover:shadow-[#183B56]/[0.06] sm:p-7">
+                <article className="group relative flex h-full min-h-[240px] flex-col overflow-hidden rounded-2xl border border-[#183B56]/10 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#2E6DA4]/50 hover:shadow-lg hover:shadow-[#183B56]/[0.06] sm:min-h-[300px] sm:p-7">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-medium uppercase tracking-[0.18em] text-[#2E6DA4]">
                       Alumni
@@ -1105,7 +1137,7 @@ export default function Home() {
                     </span>
                   </div>
 
-                  <div className="my-8 h-px w-full bg-[#183B56]/10" aria-hidden="true">
+                  <div className="my-6 h-px w-full bg-[#183B56]/10 sm:my-8" aria-hidden="true">
                     <div className="h-px w-10 bg-[#2E6DA4] transition-all duration-500 group-hover:w-full" />
                   </div>
 
@@ -1138,23 +1170,23 @@ export default function Home() {
       {/* =====================================================
           CONTACT
       ====================================================== */}
-      <section id="contact" className="scroll-mt-20 bg-[#183B56] py-20 text-white lg:py-28">
-        <div className={`${container} grid gap-14 lg:grid-cols-2 lg:gap-24`}>
+      <section id="contact" className="scroll-mt-20 bg-[#183B56] py-16 text-white sm:py-20 lg:py-28">
+        <div className={`${container} grid gap-12 lg:grid-cols-2 lg:gap-24`}>
           <div>
             <Heading
               lines={["We would love", "to meet you."]}
               italicLast
-              className="text-[clamp(2.75rem,5.5vw,4.75rem)] font-medium leading-[1.02] tracking-[-0.02em]"
+              className="text-[clamp(2.4rem,5.5vw,4.75rem)] font-medium leading-[1.02] tracking-[-0.02em]"
             />
             <Reveal delay={200}>
-              <p className="mt-6 max-w-lg text-base leading-8 text-white/75">
+              <p className="mt-5 max-w-lg text-[15px] leading-7 text-white/75 sm:mt-6 sm:text-base sm:leading-8">
                 Visit {FULL_NAME} and see a welcoming environment where
                 students are encouraged to learn, grow, explore, and build
                 confidence for the future.
               </p>
             </Reveal>
 
-            <dl className="mt-12 space-y-7">
+            <dl className="mt-10 space-y-6 sm:mt-12 sm:space-y-7">
               {[
                 {
                   label: "Visit",
@@ -1181,7 +1213,7 @@ export default function Home() {
                   key={row.label}
                   variant="left"
                   delay={250 + i * 110}
-                  className="[&_a]:text-lg [&_a]:font-medium [&_a]:underline [&_a]:decoration-white/25 [&_a]:underline-offset-4 [&_a]:transition-colors [&_a]:hover:decoration-white [&_a]:focus-visible:outline [&_a]:focus-visible:outline-2 [&_a]:focus-visible:outline-offset-2 [&_a]:focus-visible:outline-white"
+                  className="[&_a]:inline-block [&_a]:py-1 [&_a]:text-base [&_a]:font-medium [&_a]:underline [&_a]:decoration-white/25 [&_a]:underline-offset-4 [&_a]:transition-colors [&_a]:hover:decoration-white [&_a]:focus-visible:outline [&_a]:focus-visible:outline-2 [&_a]:focus-visible:outline-offset-2 [&_a]:focus-visible:outline-white sm:[&_a]:text-lg"
                 >
                   <dt className="text-sm text-white/70">{row.label}</dt>
                   <dd className="mt-1 break-words">{row.node}</dd>
@@ -1193,7 +1225,7 @@ export default function Home() {
           <Reveal delay={150}>
             <form
               onSubmit={handleEnquiry}
-              className="rounded-3xl bg-white p-6 text-[#102A43] shadow-[0_24px_60px_rgba(0,0,0,0.25)] sm:p-9"
+              className="rounded-3xl bg-white p-5 text-[#102A43] shadow-[0_24px_60px_rgba(0,0,0,0.25)] min-[400px]:p-6 sm:p-9"
             >
               <h3 className={`${display} text-3xl font-medium text-[#183B56]`}>
                 Send us a message
@@ -1202,7 +1234,7 @@ export default function Home() {
                 Tell us a little about your child and we will get back to you.
               </p>
 
-              <div className="mt-7 space-y-4">
+              <div className="mt-6 space-y-4 sm:mt-7">
                 <div className="relative">
                   <input id="name" name="name" type="text" required autoComplete="name" placeholder=" " className={fieldBase} />
                   <label htmlFor="name" className={floatLabel}>Your name</label>
@@ -1227,7 +1259,7 @@ export default function Home() {
                   </select>
                   <label
                     htmlFor="stage"
-                    className="pointer-events-none absolute left-4 top-[7px] text-xs leading-4 text-[#526174]"
+                    className="pointer-events-none absolute left-4 top-[7px] max-w-[calc(100%-3rem)] truncate text-xs leading-4 text-[#526174]"
                   >
                     Which stage are you asking about?
                   </label>
@@ -1251,7 +1283,7 @@ export default function Home() {
 
               <button
                 type="submit"
-                className={`mt-6 flex w-full items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold text-white transition-colors ${
+                className={`mt-6 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold text-white transition-colors ${
                   sent ? "bg-[#2E7D5B]" : "bg-[#183B56] hover:bg-[#2A5A7F]"
                 } ${focus}`}
               >
@@ -1286,21 +1318,22 @@ export default function Home() {
         >
           Aim High
         </div>
-        <div className={`${container} flex flex-col gap-6 border-t border-white/10 py-8 md:flex-row md:items-center md:justify-between`}>
+        {/* Extra bottom padding on phones keeps the floating button off the links */}
+        <div className={`${container} flex flex-col gap-6 border-t border-white/10 pb-24 pt-8 md:flex-row md:items-center md:justify-between md:py-8`}>
           <p className="text-sm">
             © {new Date().getFullYear()} {FULL_NAME} (Aim High School), Gujrat. All rights reserved.
           </p>
           <nav aria-label="Footer">
-            <ul className="flex flex-wrap gap-x-7 gap-y-2 text-sm">
+            <ul className="flex flex-wrap gap-x-6 gap-y-1 text-sm sm:gap-x-7">
               {navLinks.map((link) => (
                 <li key={link.href}>
-                  <a href={link.href} className={`transition-colors hover:text-white ${focus}`}>
+                  <a href={link.href} className={`inline-block py-1.5 transition-colors hover:text-white ${focus}`}>
                     {link.label}
                   </a>
                 </li>
               ))}
               <li>
-                <a href="#top" className={`transition-colors hover:text-white ${focus}`}>
+                <a href="#top" className={`inline-block py-1.5 transition-colors hover:text-white ${focus}`}>
                   Back to top
                 </a>
               </li>
@@ -1311,11 +1344,12 @@ export default function Home() {
 
       {/* Floating message button */}
       <div
-        className={`fixed bottom-5 right-5 z-40 transition-all duration-500 ${
+        className={`fixed right-4 z-40 transition-all duration-500 sm:right-5 ${
           showFab
             ? "translate-y-0 opacity-100"
             : "pointer-events-none translate-y-20 opacity-0"
         }`}
+        style={{ bottom: "max(1.25rem, env(safe-area-inset-bottom))" }}
       >
         <span
           aria-hidden="true"
