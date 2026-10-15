@@ -12,8 +12,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-
-export const metadata: Metadata = {
+export const metadata = {
   title: "Aims High School",
   description: "Official website of Aims High School",
   icons: {
